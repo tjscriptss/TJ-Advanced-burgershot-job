@@ -4,9 +4,11 @@ Preview: https://youtu.be/B-RV-UVwSgQ
 
 Features
 - Configurable job
-- Localisation for everything
-- Items durability
+- Configurable locations
 - Duty system
-- Cutting, frying and making
-- OX Target and OX lib integration
-- NUI For ordering
+- Cooking system
+- Frying system
+- Preparing system
+- Drinks system
+- Integrated stores
+- Cutting system
