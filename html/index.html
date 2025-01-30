@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Menu</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="notifications"></div>
+    <div class="container">
+        <button class="close-btn" onclick="closeMenu()">&times;</button>
+        <div class="header">
+            <div class="balance">Restaurant Menu</div>
+        </div>
+        
+        <div class="menu-container" id="menuItems">
+        </div>
+        
+        <div class="checkout-container">
+            <button class="checkout-btn" onclick="openCheckout()">
+                Checkout
+            </button>
+        </div>
+    </div>
+
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeCheckout()">&times;</button>
+        </div>
+    </div>
+
+    <script src="nui://game/ui/jquery.js" type="text/javascript"></script>
+    <script src="script.js"></script>
+</body>
+</html>
