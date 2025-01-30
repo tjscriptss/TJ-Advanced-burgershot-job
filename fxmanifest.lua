@@ -1,4 +1,3 @@
-shared_script '@hPapuca/shared_fg-obfuscated.lua'
 fx_version 'cerulean'
 lua54 'yes'
 game 'gta5'
