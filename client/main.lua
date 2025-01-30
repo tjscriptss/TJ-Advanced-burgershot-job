@@ -78,7 +78,7 @@ RegisterNUICallback('createOrder', function(data, cb)
     cb('ok')
 end)
 
-Citizen.CreateThread(function()
+CreateThread(function()
     for i = 1, #Config.Lokacije, 1 do
         local v = Config.Lokacije[i]
         exports.qtarget:AddBoxZone(v.name, v.target.coords, v.target.width, v.target.lenght, {
@@ -544,16 +544,12 @@ end)
 
 RegisterNetEvent('trowe:periruke')
 AddEventHandler('trowe:periruke', function()
-    local playerPed = PlayerPedId()
-    local animDict = 'missheist_agency3aig_23'
-    local animName = 'urinal_sink_loop'
-    
-    RequestAnimDict(animDict)
-    while not HasAnimDictLoaded(animDict) do
-        Citizen.Wait(100)
+    RequestAnimDict(missheist_agency3aig_23)
+    while not HasAnimDictLoaded(missheist_agency3aig_23) do
+        Wait(100)
     end
     
-    TaskPlayAnim(playerPed, animDict, animName, 8.0, -8.0, -1, 49, 0, false, false, false)
+    TaskPlayAnim(PlayerPedId(), missheist_agency3aig_23, urinal_sink_loop, 8.0, -8.0, -1, 49, 0, false, false, false)
     
     if lib.progressCircle({
         duration = 5000,
@@ -565,7 +561,7 @@ AddEventHandler('trowe:periruke', function()
             move = true,
         },
     }) then
-        ClearPedTasks(playerPed)
+        ClearPedTasks(PlayerPedId())
         opraoruke = true
         lib.notify({
             title = locale('notify_title'),
@@ -746,5 +742,3 @@ CreateThread(function()
         })
     end
 end)
-
-
