@@ -1,5 +1,5 @@
 # TJ-Advanced-burgershot-job
-Advanced burgershot job for ESX &amp; OX
+Advanced burgershot job for ESX & QB &amp; OX
 Preview: https://youtu.be/B-RV-UVwSgQ
 
 Features
