@@ -12,3 +12,7 @@ Features
 - Drinks system
 - Integrated stores
 - Cutting system
+
+If you want to support us you can do it through our paypal.
+
+https://paypal.me/troweyt
