@@ -10,6 +10,7 @@
     "washing_hands_target": "Operite ruke",
     "make_juice_fail": "Niste lepo pokrenuli masinu",
     "cutting_fail": "Isekli ste premalo",
+    "make_food_fail": "Pocepo si lepinje",
     "order_accepted": "Narudzbina prihvacena",
     "order_accepted_desc": "Narudzbina broj #%d je prihvacena",
     "orders_menu": "Porudzbine",

@@ -10,6 +10,7 @@
     "washing_hands_target": "Wash hands",
     "make_juice_fail": "You failed to start machine",
     "cutting_fail": "You chopped it to small",
+    "make_food_fail": "You tore burger buns",
     "order_accepted": "Order accepted",
     "order_accepted_desc": "Order number #%d is accepted",
     "orders_menu": "Open order menu",

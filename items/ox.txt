@@ -1,0 +1,212 @@
+['rawburgerpatty'] = {
+	label = 'Burger patty',
+	weight = 100,
+	degrade = 120,
+},
+
+['cookedburgerpatty'] = {
+	label = 'Cooked Burger patty',
+	weight = 100,
+	degrade = 30,
+},
+
+['veganburgerpatty'] = {
+	label = 'Vegan Burger patty',
+	weight = 100,
+	degrade = 250,
+},
+
+['cookedveganburgerpatty'] = {
+	label = 'Cooked Vegan Burger patty',
+	weight = 100,
+	degrade = 30,
+},
+
+['potato'] = {
+	label = 'Potato',
+	weight = 100,
+},
+
+['cutpotato'] = {
+	label = 'Sliced Potato',
+	weight = 100,
+},
+
+['onion'] = {
+	label = 'Onion',
+	weight = 60,
+},
+
+['cutonion'] = {
+	label = 'Sliced Onion',
+	weight = 60,
+},
+
+['tomato'] = {
+	label = 'Tomato',
+	weight = 40,
+},
+
+['cuttomato'] = {
+	label = 'Sliced Tomato',
+	weight = 40,
+},
+
+['burgerbun'] = {
+	label = 'Burger bun',
+	weight = 50,
+},
+
+['cheddar'] = {
+	label = 'Cheddar cheese',
+	weight = 20,
+},
+
+['lettuce'] = {
+	label = 'Lettuce',
+	weight = 40,
+},
+
+['cutlettuce'] = {
+	label = 'Sliced Lettuce',
+	weight = 40,
+},
+
+['nuggets'] = {
+	label = 'Raw chicken nuggets',
+	weight = 40,
+	degrade = 120,
+},
+
+['receipt'] = {
+	label = 'Receipt',
+	weight = 1,
+},
+
+['bleeder'] = {
+	label = 'Bleeder burger',
+	weight = 250,
+	client = {
+		status = { hunger = 40000 },
+		anim = 'eating',
+		prop = { model = `prop_cs_burger_01`, pos = vec3(0.13, 0.05, 0.02), rot = vec3(-50.0, 16.0, 60.0) },
+		usetime = 2500,
+		notification = 'Pojeo si burger'
+	},
+	degrade = 60,
+},
+
+['meatfree'] = {
+	label = 'Vegan burger',
+	weight = 250,
+	client = {
+		status = { hunger = 40000 },
+		anim = 'eating',
+		prop = { model = `prop_cs_burger_01`, pos = vec3(0.13, 0.05, 0.02), rot = vec3(-50.0, 16.0, 60.0) },
+		usetime = 2500,
+		notification = 'Pojeo si burger'
+	},
+	degrade = 60,
+},
+
+['torpedo'] = {
+	label = 'Torpedo sandwich',
+	weight = 250,
+	client = {
+		status = { hunger = 40000 },
+		anim = 'eating',
+		prop = { model = `prop_cs_burger_01`, pos = vec3(0.13, 0.05, 0.02), rot = vec3(-50.0, 16.0, 60.0) },
+		usetime = 2500,
+		notification = 'Pojeo si burger'
+	},
+	degrade = 60,
+},
+
+['cookednuggets'] = {
+	label = 'Chicken nuggets',
+	weight = 250,
+	client = {
+		status = { hunger = 40000 },
+		anim = 'eating',
+		prop = { model = `prop_cs_burger_01`, pos = vec3(0.13, 0.05, 0.02), rot = vec3(-50.0, 16.0, 60.0) },
+		usetime = 2500,
+		notification = 'You ate chicken nuggets'
+	},
+	degrade = 60,
+},
+
+['heartstopper'] = {
+	label = 'Heartstopper burger',
+	weight = 250,
+	client = {
+		status = { hunger = 40000 },
+		anim = 'eating',
+		prop = { model = `prop_cs_burger_01`, pos = vec3(0.13, 0.05, 0.02), rot = vec3(-50.0, 16.0, 60.0) },
+		usetime = 2500,
+		notification = 'Pojeo si burger'
+	},
+	degrade = 60,
+},
+
+['moneyshot'] = {
+	label = 'Money shot burger',
+	weight = 250,
+	client = {
+		status = { hunger = 40000 },
+		anim = 'eating',
+		prop = { model = `prop_cs_burger_01`, pos = vec3(0.13, 0.05, 0.02), rot = vec3(-50.0, 16.0, 60.0) },
+		usetime = 2500,
+		notification = 'Pojeo si burger'
+	},
+	degrade = 60,
+},
+
+['fries'] = {
+	label = 'Fries',
+	weight = 100,
+	client = {
+		status = { hunger = 30000 },
+		anim = 'eating',
+		prop = { model = `prop_food_bs_chips`, pos = vec3(0.13, 0.05, 0.02), rot = vec3(-50.0, 16.0, 60.0) },
+		usetime = 2500,
+		notification = 'Pojeo si pomfrit'
+	},
+	degrade = 60,
+},
+
+['bscoke'] = {
+	label = 'Burgershot Coke',
+	weight = 100,
+	client = {
+		status = { thirst = 120000 },
+		anim = { dict = 'mp_player_intdrink', clip = 'loop_bottle' },
+		prop = { model = `prop_food_bs_juice01`, pos = vec3(0.01, 0.01, 0.06), rot = vec3(5.0, 5.0, -180.5) },
+		usetime = 2500,
+		notification = 'Popio si kole'
+	},
+},
+
+['bscoffee'] = {
+	label = 'Burgershot Coffee',
+	weight = 100,
+	client = {
+		status = { thirst = 120000 },
+		anim = { dict = 'mp_player_intdrink', clip = 'loop_bottle' },
+		prop = { model = `prop_food_bs_coffee`, pos = vec3(0.01, 0.01, 0.06), rot = vec3(5.0, 5.0, -180.5) },
+		usetime = 2500,
+		notification = 'Popio si kafe'
+	}
+},
+
+['milkshake'] = {
+	label = 'Milkshake',
+	weight = 100,
+	client = {
+		status = { thirst = 120000 },
+		anim = { dict = 'mp_player_intdrink', clip = 'loop_bottle' },
+		prop = { model = `prop_cs_bs_cup`, pos = vec3(0.01, 0.01, 0.06), rot = vec3(5.0, 5.0, -180.5) },
+		usetime = 2500,
+		notification = 'Popio si milkshake'
+	},
+	degrade = 60,
+},
