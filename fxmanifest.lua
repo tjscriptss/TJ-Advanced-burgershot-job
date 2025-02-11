@@ -5,7 +5,7 @@ game 'gta5'
 name "TJ Burgershot"
 description "TJ Advanced burgershot script"
 author "TJ Scripts (https://discord.gg/tbSF4N7eCb)"
-version "1.2.0"
+version "1.3.0"
 
 ui_page 'html/index.html'
 

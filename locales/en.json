@@ -27,5 +27,18 @@
     "deep_fryer": "Frying",
     "cutting": "Cutting...",
     "making_drink": "Making drink...",
-    "making_food": "Making food"
+    "making_food": "Making food",
+    "start_delivery_target": "Start delivery",
+    "return_veh": "Return vehicle",
+    "vehicle_not_found": "No vehicles in the area",
+    "deliver_target": "Deliver food",
+    "delivery_accepted": "You accepted delivery",
+    "delivery_completed": "You completed delivery!!",
+    "wardrobe_target": "Access wardrobe",
+    "garage_title": "Vehicle Garage",
+    "car_spawn": "%s car has been spawned",
+    "car_garage": "Garage",
+    "return_vehcile": "Return Vehcile",
+    "spawn_blocked": "Spawn point is blocked",
+    "blip_label": "Burgershot"
 }

@@ -1,3 +1,4 @@
+ESX = exports['es_extended']:getSharedObject()
 lib.locale()
 local Items = {}
 local description = {}
@@ -138,11 +139,7 @@ CreateThread(function()
                         {
                             icon = v.target.icon,
                             label = v.target.label,
-                            groups = Config.Resotrani[i].job,
                             onSelect = v.target.action,
-                            canInteract = function()
-                                return onDuty and washedHands
-                            end,
                         },
                     },
                     distance = 3.0,
@@ -630,6 +627,72 @@ AddEventHandler('tj_burgershot:washHands', function()
     end
 end)
 
+local spawnedVehicles = {}
+
+RegisterNetEvent('tj_burgershot:returnVehicle')
+AddEventHandler('tj_burgershot:returnVehicle', function()
+    local playerPed = PlayerPedId()
+    local vozilo = GetVehiclePedIsIn(playerPed,false)
+    local vehicleProps = ESX.Game.GetVehicleProperties(vozilo)
+    local vehicleSpeed = math.floor((GetEntitySpeed(GetVehiclePedIsIn(playerPed, false))*3.6))
+    if (vehicleSpeed > 45) then FreezeEntityPosition(vozilo, true) end
+    TaskLeaveVehicle(playerPed, vozilo, 0)
+    while IsPedInVehicle(playerPed, vozilo, true) do Wait(0) end
+    Citizen.Wait(300)
+    NetworkFadeOutEntity(vozilo, true, true)
+    Citizen.Wait(100)
+    ESX.Game.DeleteVehicle(vozilo)
+end)
+
+RegisterNetEvent('tj_burgershot:spawnCar')
+AddEventHandler('tj_burgershot:spawnCar', function()
+    local options = {}
+    
+    for i, vehicle in ipairs(Config.Vehicles) do
+        table.insert(options, {
+            title = vehicle.label,
+            description = 'Spawn ' .. vehicle.label,
+            icon = 'car',
+            onSelect = function()
+                SpawnVehicle(vehicle)
+            end
+        })
+    end
+    
+    lib.registerContext({
+        id = 'tj_burger_car_garage',
+        title = locale('garage_title'),
+        options = options
+    })
+
+    lib.showContext('tj_burger_car_garage') 
+end)
+
+function SpawnVehicle(vehicleData)
+    local playerPed = PlayerPedId()    
+    if	ESX.Game.IsSpawnPointClear(vector3(-1165.0553, -887.7554, 14.1464), 5.0) then
+    ESX.Game.SpawnVehicle(vehicleData.model, vector3(Config.SpawnLocation.x, Config.SpawnLocation.y, Config.SpawnLocation.z), Config.SpawnLocation.w, function(vehicle)
+        local playerPed = PlayerPedId()
+        spawnedVehicles[vehicleData.model] = vehicle
+        SetVehicleEngineOn(vehicle, false, false, true)
+        SetVehicleDoorsLocked(vehicle, 1)
+        TaskWarpPedIntoVehicle(playerPed, vehicle, -1) 
+        lib.notify({
+            title = locale('notify_title'),
+            description = locale('car_spawn'):format(vehicleData.label),
+            type = 'success'
+        })
+    end)
+    else
+        lib.notify({
+            title = locale('notify_title'),
+            description = locale('spawn_blocked'),
+            type = 'error'
+        })
+    end
+end
+
+
 
 if Config.Target == 'ox' then
     exports.ox_target:addBoxZone({
@@ -661,6 +724,29 @@ if Config.Target == 'ox' then
                 icon = "fas fa-hands-bubbles",
                 label = locale('washing_hands_target'),
                 groups = Config.Locations2.WashingHands.job,
+            },
+        },
+        distance = 1.5
+    })
+
+    exports.ox_target:addBoxZone({
+        name = "Car",
+        coords = vec3(Config.Locations2.CarSpawner.coords.x, Config.Locations2.CarSpawner.coords.y, Config.Locations2.CarSpawner.coords.z),
+        size = vec3(Config.Locations2.CarSpawner.size[1], Config.Locations2.CarSpawner.size[2], Config.Locations2.CarSpawner.maxZ - Config.Locations2.CarSpawner.minZ),
+        rotation = Config.Locations2.CarSpawner.heading + 90,
+        debug = false,
+        options = {
+            {
+                event = "tj_burgershot:spawnCar",
+                icon = "fas fa-car",
+                label = locale('car_garage'),
+                groups = Config.Locations2.CarSpawner.job,
+            },
+            {
+                event = "tj_burgershot:returnVehicle",
+                icon = "fas fa-car",
+                label = locale('return_vehcile'),
+                groups = Config.Locations2.CarSpawner.job,
             },
         },
         distance = 1.5
@@ -697,6 +783,30 @@ elseif Config.Target == 'qb' then
                 icon = "fas fa-hands-bubbles",
                 label = locale('washing_hands_target'),
                 job = Config.Locations2.WashingHands.job,
+            },
+        },
+        distance = 1.5
+    })
+
+    exports['qb-target']:AddBoxZone("Car", Config.Locations2.WashingHands.coords, Config.Locations2.WashingHands.size[1], Config.Locations2.WashingHands.size[2], {
+        name = "car",
+        heading = Config.Locations2.WashingHands.heading,
+        debugPoly = false,
+        minZ = Config.Locations2.WashingHands.minZ + 1,
+        maxZ = Config.Locations2.WashingHands.maxZ + 1,
+    }, {
+        options = {
+            {
+                event = "tj_burgershot:spawnCar",
+                icon = "fas fa-car",
+                label = locale('car_garage'),
+                groups = Config.Locations2.CarSpawner.job,
+            },
+            {
+                event = "tj_burgershot:returnVehicle",
+                icon = "fas fa-car",
+                label = locale('return_vehcile'),
+                groups = Config.Locations2.CarSpawner.job,
             },
         },
         distance = 1.5
@@ -878,3 +988,306 @@ CreateThread(function()
 end)
 
 NapraviMenije()
+
+local createdPeds = {}
+
+CreateThread(function()
+    while true do
+        local playerPed = PlayerPedId()
+        local playerCoords = GetEntityCoords(playerPed)
+        
+        for k, v in pairs(Config.Ped) do
+            local distance = #(playerCoords - vector3(v.coords.x, v.coords.y, v.coords.z))
+            
+            if distance < 50 and not createdPeds[k] then
+                local pedHash = GetHashKey(v.model)
+                
+                RequestModel(pedHash)
+                while not HasModelLoaded(pedHash) do
+                    Wait(1)
+                end
+                
+                local ped = CreatePed(4, pedHash, v.coords.x, v.coords.y, v.coords.z - 1.0, v.coords.w, false, true)
+                FreezeEntityPosition(ped, true)
+                SetEntityInvincible(ped, true)
+                SetBlockingOfNonTemporaryEvents(ped, true)
+                
+                if v.scenario then
+                    TaskStartScenarioInPlace(ped, v.scenario, 0, true)
+                end
+                
+                createdPeds[k] = ped
+            elseif distance >= 50 and createdPeds[k] then
+                DeletePed(createdPeds[k])
+                createdPeds[k] = nil
+            end
+        end
+        Wait(1000)
+    end
+end)
+
+-- wardrobe
+
+CreateThread(function()
+    RequestModel(GetHashKey(Config.wardrobePed))
+    while not HasModelLoaded(GetHashKey(Config.wardrobePed)) do
+        Wait(100)
+    end
+
+    wardrobePed = CreatePed(4, GetHashKey(Config.wardrobePed), Config.wardrobePedLoc.x, Config.wardrobePedLoc.y, Config.wardrobePedLoc.z, Config.wardrobePedLoc.w, false, true)
+    FreezeEntityPosition(wardrobePed, true)
+    SetEntityInvincible(wardrobePed, true)
+    SetBlockingOfNonTemporaryEvents(wardrobePed, true)
+
+    if Config.Target == 'qb' then
+        exports['qb-target']:AddTargetEntity(wardrobePed, {
+            options = {
+                {
+                    label = locale('wardrobe_target'),
+                    job = Config.Locations2.Duty.job,
+                    icon = 'fa-solid fa-shirt',
+                    action = function()
+                        OpenAppearanceMenu()
+                    end,
+                    canInteract = function()
+                        return onDuty
+                    end,
+                }
+            },
+            distance = 2.5
+        })
+    elseif Config.Target == 'ox' then
+        exports.ox_target:addLocalEntity(wardrobePed, {
+            name = 'access_wardrobe',
+            label = locale('wardrobe_target'),
+            icon = 'fa-solid fa-shirt',
+            groups = Config.Locations2.Duty.job,
+            distance = 2.5,
+            onSelect = function()
+                OpenAppearanceMenu()
+            end,
+            canInteract = function()
+                return onDuty
+            end,
+        })
+    end
+end)
+
+function OpenAppearanceMenu()
+    if Config.Appearance == 'qb' then
+        TriggerEvent('qb-clothing:client:openMenu')
+    elseif Config.Appearance == 'esx' then
+        TriggerEvent('esx_skin:openMenu')
+    elseif Config.Appearance == 'illenium' then
+        TriggerEvent("illenium-appearance:client:openClothingShopMenu")
+    elseif Config.Appearance == 'fivem' then
+        TriggerEvent('fivem-appearance:client:openMenu')
+    end
+end
+
+-- delivery
+
+local deliveryPed = nil
+local deliveryTargetPed = nil
+local currentDeliveryLocation = nil
+local currentDeliveryItems = {}
+local targetType = Config.Target
+local currentDeliveryPlayerSrc = nil 
+
+CreateThread(function()
+    RequestModel(GetHashKey(Config.DeliveryPedModel))
+    while not HasModelLoaded(GetHashKey(Config.DeliveryPedModel)) do
+        Wait(100)
+    end
+
+    deliveryPed = CreatePed(4, GetHashKey(Config.DeliveryPedModel), Config.DeliveryPedLocation.x, Config.DeliveryPedLocation.y, Config.DeliveryPedLocation.z, Config.DeliveryPedLocation.w, false, true)
+    FreezeEntityPosition(deliveryPed, true)
+    SetEntityInvincible(deliveryPed, true)
+    SetBlockingOfNonTemporaryEvents(deliveryPed, true)
+    if Config.Target == 'qb' then
+        exports['qb-target']:AddTargetEntity(deliveryPed, {
+            options = {
+                {
+                    label = locale('start_delivery_target'),
+                    icon = 'fa-solid fa-burger',
+                    job = Config.Locations2.Duty.job,
+                    action = function(entity)
+                        TriggerServerEvent('burgershot_delivery:startDelivery')
+                    end,
+                    canInteract = function()
+                        return onDuty
+                    end,
+                },
+                {
+                    label = locale('return_veh'),
+                    icon = 'fa-solid fa-car',
+                    job = Config.Locations2.Duty.job,
+                    action = function(entity)
+                        ReturnVehicle()
+                    end,
+                    canInteract = function()
+                        return onDuty
+                    end,
+                },
+            },
+            distance = 2.5
+        })
+    elseif Config.Target == 'ox' then
+        exports.ox_target:addLocalEntity(deliveryPed, {
+            {
+                name = 'burgershot_delivery_start',
+                label = locale('start_delivery_target'),
+                icon = 'fa-solid fa-burger',
+                distance = 2.5,
+                groups = Config.Locations2.Duty.job,
+                onSelect = function()
+                    TriggerServerEvent('burgershot_delivery:startDelivery')
+                end,
+                canInteract = function()
+                    return onDuty
+                end,
+            },
+            {
+                name = 'return_veh',
+                label = locale('return_veh'),
+                icon = 'fa-solid fa-car',
+                distance = 2.5,
+                groups = Config.Locations2.Duty.job,
+                onSelect = function()
+                    ReturnVehicle()
+                end,
+                canInteract = function()
+                    return onDuty
+                end,
+            },
+        })
+        
+    else
+    end
+end)
+
+function ReturnVehicle()
+    local playerCoords = GetEntityCoords(PlayerPedId())  
+    local vehicle = GetClosestVehicle(playerCoords.x, playerCoords.y, playerCoords.z, 8.0, 0, 71)  
+
+    if DoesEntityExist(vehicle) then  
+        DeleteEntity(vehicle)
+    else
+        lib.notify({
+            title = locale('vehicle_not_found')
+        })
+    end
+end
+
+RegisterNetEvent('burgershot_delivery:setDeliveryLocation', function(deliveryLocation, deliveryItems, playerSrc)
+    currentDeliveryLocation = deliveryLocation
+    currentDeliveryItems = deliveryItems
+    currentDeliveryPlayerSrc = playerSrc
+
+    lib.notify({
+        title = locale('delivery_accepted'),
+        type = 'success'
+    })
+
+    local model = GetHashKey(Config.DeliveryVehicle)
+    RequestModel(model)
+    while not HasModelLoaded(model) do Wait(100) end
+    local vehicle = CreateVehicle(model, Config.DeliveryVehSpawnCoord.x, Config.DeliveryVehSpawnCoord.y, Config.DeliveryVehSpawnCoord.z, Config.DeliveryVehSpawnCoord.w, true, false)
+    if DoesEntityExist(vehicle) then
+        SetVehicleNumberPlateText(vehicle, "BURGERSHOT")
+        SetPedIntoVehicle(PlayerPedId(), vehicle, -1)
+        SetEntityAsMissionEntity(vehicle, true, true) 
+        SetModelAsNoLongerNeeded(model)
+    else
+    end    
+
+    SetNewWaypoint(deliveryLocation.x, deliveryLocation.y)
+
+    CreateThread(function()
+        local rngPed = math.random(1, #Config.DeliveryTargetPedModels)
+        local buyerPed = GetHashKey(Config.DeliveryTargetPedModels[rngPed])
+
+        RequestModel(buyerPed)
+        while not HasModelLoaded(buyerPed) do
+            Wait(100)
+        end
+
+        deliveryTargetPed = CreatePed(4, buyerPed, deliveryLocation.x, deliveryLocation.y, deliveryLocation.z, deliveryLocation.w, false, true)
+        FreezeEntityPosition(deliveryTargetPed, true)
+        SetEntityInvincible(deliveryTargetPed, true)
+        SetBlockingOfNonTemporaryEvents(deliveryTargetPed, true)
+
+        if Config.Target == 'qb' then
+            exports['qb-target']:AddTargetEntity(deliveryTargetPed, {
+                options = {
+                    {
+                        label = locale('deliver_target'),
+                        job = Config.Locations2.Duty.job,
+                        action = function(entity, player) 
+                            local playerServerId = GetPlayerServerId(PlayerId())
+                            if playerServerId == currentDeliveryPlayerSrc then
+                                TriggerServerEvent('burgershot_delivery:completeDelivery', currentDeliveryPlayerSrc)
+                            else
+                            end
+                        end
+                    }
+                },
+                distance = 2.5
+            })
+        elseif Config.Target == 'ox' then
+            exports.ox_target:addLocalEntity(deliveryTargetPed, {
+                name = 'burgershot_delivery_complete',
+                label = locale('deliver_target'),
+                icon = 'fa-solid fa-burger',
+                distance = 2.5,
+                groups = Config.Locations2.Duty.job,
+                onSelect = function()
+                    local playerServerId = GetPlayerServerId(PlayerId())
+                    if playerServerId == currentDeliveryPlayerSrc then
+                        TriggerServerEvent('burgershot_delivery:completeDelivery', currentDeliveryPlayerSrc)
+                    else
+                    end
+                end,
+            })
+        else
+        end
+    end)
+end)
+
+RegisterNetEvent('burgershot_delivery:deliveryCompleted', function(moneyReward)
+    currentDeliveryLocation = nil
+    currentDeliveryItems = {}
+    currentDeliveryPlayerSrc = nil
+
+    if DoesEntityExist(deliveryTargetPed) then
+        DeletePed(deliveryTargetPed)
+        deliveryTargetPed = nil
+    end
+
+    lib.notify({
+        title = locale('delivery_completed'),
+        type = 'success'
+    })
+end)
+
+-- blip
+
+local blip = AddBlipForCoord(Config.Ordering[1].coords.x, Config.Ordering[1].coords.y, Config.Ordering[1].coords.z)
+SetBlipSprite(blip, 106)
+SetBlipDisplay(blip, 4)
+SetBlipScale(blip, 0.8)
+SetBlipColour(blip, 5)
+SetBlipAsShortRange(blip, true)
+BeginTextCommandSetBlipName('STRING')
+AddTextComponentString(locale('blip_label'))
+EndTextCommandSetBlipName(blip)
+
+AddEventHandler('onResourceStop', function(resourceName)
+    if GetCurrentResourceName() == resourceName then
+        for k, v in pairs(createdPeds) do
+            if DoesEntityExist(v) then
+                DeletePed(v)
+            end
+        end
+    end
+end)

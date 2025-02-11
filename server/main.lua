@@ -21,9 +21,8 @@ Citizen.CreateThread(function()
         for j = 1, #Config.Resotrani[i].stashovi, 1 do
             local v = Config.Resotrani[i].stashovi[j]
             if Config.Inventory == 'ox' then
-                print('kreno')
+
                 exports.ox_inventory:RegisterStash(v.name, v.label, v.slots, v.weight)
-                print('nece')
             elseif Config.Inventory == 'qs' then
                 exports['qs-inventory']:RegisterStash(v.name, v.label, v.slots, v.weight)
             end
@@ -99,12 +98,14 @@ lib.callback.register('tj_restaurants:checkItems', function(source, itemData)
 
         if Config.Inventory == 'ox' then
             if Config.Framework == 'qb' then
-                item = xPlayer.Functions.GetItemByName(v.name)
+                local QBPlayer = QBCore.Functions.GetPlayer(source)
+                item = QBPlayer.Functions.GetItemByName(v.name)
             elseif Config.Framework == 'esx' then
                 item = xPlayer.getInventoryItem(v.name)
             end
         elseif Config.Inventory == 'qb' then
-            item = xPlayer.Functions.GetItemByName(v.name)
+            local QBPlayer = QBCore.Functions.GetPlayer(source)
+            item = QBPlayer.Functions.GetItemByName(v.name)
         elseif Config.Inventory == 'qs' then
             item = exports['qs-inventory']:HasItem(source, v.name)  
         end
@@ -282,4 +283,120 @@ end
 RegisterServerEvent('tj_burgershot:sendDiscordLog')
 AddEventHandler('tj_burgershot:sendDiscordLog', function(title, description)
     SendDiscordLog(title, description)
+end)
+
+-- delivery
+
+-- delivery
+
+function AddItemToInventory(source, itemName, itemCount)
+    if Config.Framework == "esx" then
+        local xPlayer = ESX.GetPlayerFromId(source)
+        if xPlayer then
+            xPlayer.addInventoryItem(itemName, itemCount)
+        end
+    elseif Config.Framework == "qb" then
+        local Player = QBCORE.Functions.GetPlayer(source)
+        if Player then
+            Player.Functions.AddItem(itemName, itemCount)
+        end
+    end
+end
+
+function RemoveItemFromInventory(source, itemName, itemCount)
+    if Config.Framework == "esx" then
+        local xPlayer = ESX.GetPlayerFromId(source)
+        if xPlayer then
+            xPlayer.removeInventoryItem(itemName, itemCount)
+        end
+    elseif Config.Framework == "qb" then
+        local Player = QBCORE.Functions.GetPlayer(source)
+        if Player then
+            Player.Functions.RemoveItem(itemName, itemCount)
+        end
+    end
+end
+
+function AddMoney(source, amount)
+    if Config.Framework == "esx" then
+        local xPlayer = ESX.GetPlayerFromId(source)
+        if xPlayer then
+            xPlayer.addMoney(amount)
+        end
+    elseif Config.Framework == "qb" then
+        local Player = QBCORE.Functions.GetPlayer(source)
+        if Player then
+            Player.Functions.AddMoney('cash', amount)
+        end
+    end
+end
+
+local GetRandomDeliveryItem = function()
+    local randomIndex = math.random(1, #Config.DeliveryItems)
+    return Config.DeliveryItems[randomIndex]
+end
+
+local GetRandomDeliveryLocation = function()
+    local randomIndex = math.random(1, #Config.DeliveryLocations)
+    return Config.DeliveryLocations[randomIndex]
+end
+
+local GetRandomDeliveryMoney = function()
+    return math.random(Config.DeliveryMoney.min, Config.DeliveryMoney.max)
+end
+
+local activeDeliveries = {}
+
+RegisterNetEvent('burgershot_delivery:startDelivery', function()
+    local src = source
+    local playerPed = GetPlayerPed(src)
+
+    if activeDeliveries[src] then
+        return 
+    end
+
+    local deliveryItems = {}
+    for i = 1, math.random(1,3) do 
+        local item = GetRandomDeliveryItem() 
+        table.insert(deliveryItems, item)
+        AddItemToInventory(src, item, 1)
+    end
+
+    local deliveryLocation = GetRandomDeliveryLocation() 
+    local deliveryMoney = GetRandomDeliveryMoney()
+
+    activeDeliveries[src] = {
+        location = deliveryLocation,
+        money = deliveryMoney,
+        playerSrc = src, 
+        items = deliveryItems 
+    }
+
+    TriggerClientEvent('burgershot_delivery:setDeliveryLocation', src, deliveryLocation, deliveryItems, src) 
+end)
+
+RegisterNetEvent('burgershot_delivery:completeDelivery', function(deliveryPlayerSrc)
+    local src = source
+
+    if not activeDeliveries[deliveryPlayerSrc] then 
+        return 
+    end
+
+    if src ~= deliveryPlayerSrc then
+        return 
+    end
+
+
+    local deliveryData = activeDeliveries[deliveryPlayerSrc] 
+    local moneyReward = deliveryData.money
+    local deliveredItems = deliveryData.items
+
+    for _, itemName in ipairs(deliveredItems) do
+        RemoveItemFromInventory(deliveryPlayerSrc, itemName, 1)
+    end
+
+    AddMoney(deliveryPlayerSrc, moneyReward)
+
+    TriggerClientEvent('burgershot_delivery:deliveryCompleted', deliveryPlayerSrc, moneyReward)
+    activeDeliveries[deliveryPlayerSrc] = nil 
 end)
