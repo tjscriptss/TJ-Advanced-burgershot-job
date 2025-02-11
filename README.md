@@ -12,6 +12,8 @@ Features
 - Drinks system
 - Integrated stores
 - Cutting system
+- Delivery system
+- Wardrobe
 
 If you want to support us you can do it through our paypal.
 
