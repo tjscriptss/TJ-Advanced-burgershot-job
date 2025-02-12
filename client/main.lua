@@ -1,4 +1,3 @@
-ESX = exports['es_extended']:getSharedObject()
 lib.locale()
 local Items = {}
 local description = {}
@@ -627,73 +626,6 @@ AddEventHandler('tj_burgershot:washHands', function()
     end
 end)
 
-local spawnedVehicles = {}
-
-RegisterNetEvent('tj_burgershot:returnVehicle')
-AddEventHandler('tj_burgershot:returnVehicle', function()
-    local playerPed = PlayerPedId()
-    local vozilo = GetVehiclePedIsIn(playerPed,false)
-    local vehicleProps = ESX.Game.GetVehicleProperties(vozilo)
-    local vehicleSpeed = math.floor((GetEntitySpeed(GetVehiclePedIsIn(playerPed, false))*3.6))
-    if (vehicleSpeed > 45) then FreezeEntityPosition(vozilo, true) end
-    TaskLeaveVehicle(playerPed, vozilo, 0)
-    while IsPedInVehicle(playerPed, vozilo, true) do Wait(0) end
-    Citizen.Wait(300)
-    NetworkFadeOutEntity(vozilo, true, true)
-    Citizen.Wait(100)
-    ESX.Game.DeleteVehicle(vozilo)
-end)
-
-RegisterNetEvent('tj_burgershot:spawnCar')
-AddEventHandler('tj_burgershot:spawnCar', function()
-    local options = {}
-    
-    for i, vehicle in ipairs(Config.Vehicles) do
-        table.insert(options, {
-            title = vehicle.label,
-            description = 'Spawn ' .. vehicle.label,
-            icon = 'car',
-            onSelect = function()
-                SpawnVehicle(vehicle)
-            end
-        })
-    end
-    
-    lib.registerContext({
-        id = 'tj_burger_car_garage',
-        title = locale('garage_title'),
-        options = options
-    })
-
-    lib.showContext('tj_burger_car_garage') 
-end)
-
-function SpawnVehicle(vehicleData)
-    local playerPed = PlayerPedId()    
-    if	ESX.Game.IsSpawnPointClear(vector3(-1165.0553, -887.7554, 14.1464), 5.0) then
-    ESX.Game.SpawnVehicle(vehicleData.model, vector3(Config.SpawnLocation.x, Config.SpawnLocation.y, Config.SpawnLocation.z), Config.SpawnLocation.w, function(vehicle)
-        local playerPed = PlayerPedId()
-        spawnedVehicles[vehicleData.model] = vehicle
-        SetVehicleEngineOn(vehicle, false, false, true)
-        SetVehicleDoorsLocked(vehicle, 1)
-        TaskWarpPedIntoVehicle(playerPed, vehicle, -1) 
-        lib.notify({
-            title = locale('notify_title'),
-            description = locale('car_spawn'):format(vehicleData.label),
-            type = 'success'
-        })
-    end)
-    else
-        lib.notify({
-            title = locale('notify_title'),
-            description = locale('spawn_blocked'),
-            type = 'error'
-        })
-    end
-end
-
-
-
 if Config.Target == 'ox' then
     exports.ox_target:addBoxZone({
         name = "Duty",
@@ -724,29 +656,6 @@ if Config.Target == 'ox' then
                 icon = "fas fa-hands-bubbles",
                 label = locale('washing_hands_target'),
                 groups = Config.Locations2.WashingHands.job,
-            },
-        },
-        distance = 1.5
-    })
-
-    exports.ox_target:addBoxZone({
-        name = "Car",
-        coords = vec3(Config.Locations2.CarSpawner.coords.x, Config.Locations2.CarSpawner.coords.y, Config.Locations2.CarSpawner.coords.z),
-        size = vec3(Config.Locations2.CarSpawner.size[1], Config.Locations2.CarSpawner.size[2], Config.Locations2.CarSpawner.maxZ - Config.Locations2.CarSpawner.minZ),
-        rotation = Config.Locations2.CarSpawner.heading + 90,
-        debug = false,
-        options = {
-            {
-                event = "tj_burgershot:spawnCar",
-                icon = "fas fa-car",
-                label = locale('car_garage'),
-                groups = Config.Locations2.CarSpawner.job,
-            },
-            {
-                event = "tj_burgershot:returnVehicle",
-                icon = "fas fa-car",
-                label = locale('return_vehcile'),
-                groups = Config.Locations2.CarSpawner.job,
             },
         },
         distance = 1.5
@@ -783,30 +692,6 @@ elseif Config.Target == 'qb' then
                 icon = "fas fa-hands-bubbles",
                 label = locale('washing_hands_target'),
                 job = Config.Locations2.WashingHands.job,
-            },
-        },
-        distance = 1.5
-    })
-
-    exports['qb-target']:AddBoxZone("Car", Config.Locations2.WashingHands.coords, Config.Locations2.WashingHands.size[1], Config.Locations2.WashingHands.size[2], {
-        name = "car",
-        heading = Config.Locations2.WashingHands.heading,
-        debugPoly = false,
-        minZ = Config.Locations2.WashingHands.minZ + 1,
-        maxZ = Config.Locations2.WashingHands.maxZ + 1,
-    }, {
-        options = {
-            {
-                event = "tj_burgershot:spawnCar",
-                icon = "fas fa-car",
-                label = locale('car_garage'),
-                groups = Config.Locations2.CarSpawner.job,
-            },
-            {
-                event = "tj_burgershot:returnVehicle",
-                icon = "fas fa-car",
-                label = locale('return_vehcile'),
-                groups = Config.Locations2.CarSpawner.job,
             },
         },
         distance = 1.5
@@ -988,43 +873,6 @@ CreateThread(function()
 end)
 
 NapraviMenije()
-
-local createdPeds = {}
-
-CreateThread(function()
-    while true do
-        local playerPed = PlayerPedId()
-        local playerCoords = GetEntityCoords(playerPed)
-        
-        for k, v in pairs(Config.Ped) do
-            local distance = #(playerCoords - vector3(v.coords.x, v.coords.y, v.coords.z))
-            
-            if distance < 50 and not createdPeds[k] then
-                local pedHash = GetHashKey(v.model)
-                
-                RequestModel(pedHash)
-                while not HasModelLoaded(pedHash) do
-                    Wait(1)
-                end
-                
-                local ped = CreatePed(4, pedHash, v.coords.x, v.coords.y, v.coords.z - 1.0, v.coords.w, false, true)
-                FreezeEntityPosition(ped, true)
-                SetEntityInvincible(ped, true)
-                SetBlockingOfNonTemporaryEvents(ped, true)
-                
-                if v.scenario then
-                    TaskStartScenarioInPlace(ped, v.scenario, 0, true)
-                end
-                
-                createdPeds[k] = ped
-            elseif distance >= 50 and createdPeds[k] then
-                DeletePed(createdPeds[k])
-                createdPeds[k] = nil
-            end
-        end
-        Wait(1000)
-    end
-end)
 
 -- wardrobe
 
@@ -1281,13 +1129,3 @@ SetBlipAsShortRange(blip, true)
 BeginTextCommandSetBlipName('STRING')
 AddTextComponentString(locale('blip_label'))
 EndTextCommandSetBlipName(blip)
-
-AddEventHandler('onResourceStop', function(resourceName)
-    if GetCurrentResourceName() == resourceName then
-        for k, v in pairs(createdPeds) do
-            if DoesEntityExist(v) then
-                DeletePed(v)
-            end
-        end
-    end
-end)

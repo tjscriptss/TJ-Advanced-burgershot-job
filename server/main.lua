@@ -98,13 +98,13 @@ lib.callback.register('tj_restaurants:checkItems', function(source, itemData)
 
         if Config.Inventory == 'ox' then
             if Config.Framework == 'qb' then
-                local QBPlayer = QBCore.Functions.GetPlayer(source)
+                local QBPlayer = QBCORE.Functions.GetPlayer(source)
                 item = QBPlayer.Functions.GetItemByName(v.name)
             elseif Config.Framework == 'esx' then
                 item = xPlayer.getInventoryItem(v.name)
             end
         elseif Config.Inventory == 'qb' then
-            local QBPlayer = QBCore.Functions.GetPlayer(source)
+            local QBPlayer = QBCORE.Functions.GetPlayer(source)
             item = QBPlayer.Functions.GetItemByName(v.name)
         elseif Config.Inventory == 'qs' then
             item = exports['qs-inventory']:HasItem(source, v.name)  

@@ -587,23 +587,6 @@ Config.Locations2 = { -- duty locations
     }
 }
 
-Config.Ped = { -- Ped for spawning vehicles
-    {
-        model = "csb_burgerdrug", 
-        coords = vector4(-1169.9337, -887.1362, 14.0332, 120.8001),
-        scenario = "WORLD_HUMAN_CLIPBOARD_FACILITY" 
-    }
-}
-
-Config.SpawnLocation = vector4(-1167.0641, -888.6570, 13.0823, 125.0107) -- spawn loc for vehicles
-
-Config.Vehicles = {
-    {
-        label = "Boxville",
-        model = "boxville4"
-    },
-}
-
 Config.DeliveryPedModel = "mp_m_shopkeep_01"
 Config.DeliveryPedLocation = vector4(-1165.7096, -894.6837, 13.0244, 70.5930)
 Config.DeliveryLocations = {
